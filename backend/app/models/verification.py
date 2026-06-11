@@ -31,9 +31,9 @@ class VerificationQuestion(Base):
 
     # ── Question data ────────────────────────────────────────────
     question: Mapped[str] = mapped_column(String(500), nullable=False)
-    expected_answer: Mapped[str] = mapped_column(
+    expected_answer: Mapped[str | None] = mapped_column(
         String(500),
-        nullable=False,
+        nullable=True,
         comment="Private — only visible to the finder and admins",
     )
     display_order: Mapped[int] = mapped_column(Integer, default=0)

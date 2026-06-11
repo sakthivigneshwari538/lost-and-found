@@ -2,10 +2,12 @@
 Lost and Found Portal — FastAPI Application Entry Point.
 """
 
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
-from app.routers import auth
+from app.routers import auth, items, claims
 
 # ── Create app ──────────────────────────────────────────────────
 app = FastAPI(
@@ -25,6 +27,13 @@ app.add_middleware(
 
 # ── Include routers ─────────────────────────────────────────────
 app.include_router(auth.router)
+app.include_router(items.router)
+app.include_router(claims.router)
+
+# ── Serve uploaded files ────────────────────────────────────────
+UPLOAD_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "uploads")
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 
 
 # ── Health check ────────────────────────────────────────────────

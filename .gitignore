@@ -30,3 +30,10 @@ Thumbs.db
 # Temp files
 *.log
 token.txt
+
+# Node / Frontend
+node_modules/
+dist/
+
+# Uploads
+backend/uploads/

@@ -28,6 +28,7 @@ from app.schemas.auth import (
     UserLogin,
     UserRegister,
     UserResponse,
+    UserUpdate,
     VerifyOTP,
 )
 
@@ -285,4 +286,25 @@ def get_me(current_user: User = Depends(get_current_active_user)):
     Returns the profile of the currently authenticated user.
     Requires a valid JWT token in the Authorization header.
     """
+    return current_user
+
+
+# ── PUT /api/auth/me ───────────────────────────────────────────────
+
+@router.put(
+    "/me",
+    response_model=UserResponse,
+    summary="Update current user profile",
+)
+def update_me(
+    data: UserUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    """Update the current user's profile."""
+    if data.full_name is not None:
+        current_user.full_name = data.full_name
+
+    db.commit()
+    db.refresh(current_user)
     return current_user
