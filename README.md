@@ -2,68 +2,68 @@
 
 A full-stack web application that helps campus communities report, track, and reclaim lost items. Built with **React** and **FastAPI**.
 
+---
+
 ## Features
 
-- **Post Lost & Found Items** — Report items with images, category, location, and date details
-- **Search & Filter** — Find items by type, category, keyword, and date
-- **Verification Questions** — Item posters can set questions only the real owner would know
-- **Claim System** — Submit claims on found items, answer verification questions, and get reviewed by the poster
-- **Smart Match** — Automatically suggests possible matches between lost and found items based on category, title, location, and date proximity
-- **Email OTP Authentication** — Secure registration with email verification
-- **User Dashboard** — Manage your posts, edit profile, and track claims
-- **Responsive Design** — Clean, light-themed UI that works across devices
+### Core
+- **Post Lost/Found Items** — Report items with title, category, location, date, description, and images
+- **Search & Filter** — Find items by keyword, type (lost/found), category, with pagination
+- **Image Upload** — Attach multiple images to item posts
+
+### Claims & Verification
+- **Verification Questions** — Item posters can add questions only the real owner would know
+- **Claim System** — Users can submit claims on found items with answers to verification questions
+- **Claim Review** — Item owners can compare answers, then approve or reject claims
+- **Auto-Reject** — Approving one claim automatically rejects all other pending claims
+
+### Smart Match
+- **Match Engine** — Automatically suggests possible matches between lost and found items
+- **Scoring Algorithm** — Ranks matches by category, title keywords, location proximity, and date closeness
+
+### Authentication
+- **Email OTP Verification** — New accounts are verified via a 6-digit OTP sent to email
+- **JWT Tokens** — Secure session management with JSON Web Tokens
+- **Protected Routes** — Dashboard and posting require authentication
+
+### User Management
+- **Profile Dashboard** — View profile info, manage posts, and review claims
+- **Edit Profile** — Update display name from the dashboard
+- **My Posts** — Quick access to all items you've posted
+
+---
 
 ## Tech Stack
 
 | Layer | Technology |
-|-------|-----------|
-| Frontend | React 19, Vite, Tailwind CSS |
-| Backend | FastAPI (Python), SQLAlchemy ORM |
-| Database | PostgreSQL |
-| Auth | JWT + Email OTP Verification |
-| Email | SMTP (Gmail) |
+|---|---|
+| **Frontend** | React 19, Vite, Tailwind CSS |
+| **Backend** | FastAPI (Python), SQLAlchemy ORM |
+| **Database** | PostgreSQL |
+| **Auth** | JWT + Email OTP (SMTP) |
+| **Migrations** | Alembic |
 
-## Project Structure
-
-```
-lost-and-found/
-├── backend/
-│   ├── app/
-│   │   ├── core/           # Security, email, dependencies
-│   │   ├── db/             # Database session, enums
-│   │   ├── models/         # SQLAlchemy models
-│   │   ├── routers/        # API endpoints
-│   │   └── schemas/        # Pydantic schemas
-│   ├── alembic/            # Database migrations
-│   └── requirements.txt
-├── frontend/
-│   ├── src/
-│   │   ├── api/            # Axios instance
-│   │   ├── components/     # Navbar, Toast, ProtectedRoute
-│   │   ├── context/        # AuthContext
-│   │   └── pages/          # All page components
-│   └── package.json
-└── README.md
-```
+---
 
 ## Database Schema
 
 ```
-Users ─────────< Items ─────────< Verification Questions
-                   │                        │
-                   │                        │
-                   ├──────< Item Images     │
-                   │                        │
-                   └──────< Claims ────────< Claim Answers
+Users ──────────< Items ──────────< Item Images
+                    │
+                    ├──────────< Verification Questions
+                    │
+                    └──────────< Claims ──────────< Claim Answers
 ```
 
-**Tables:** Users, Items, Item Images, Verification Questions, Claims, Claim Answers, Notifications, Admin Actions
+**Tables:** `users`, `items`, `item_images`, `verification_questions`, `claims`, `claim_answers`, `pending_registrations`, `notifications`, `admin_actions`
+
+---
 
 ## API Endpoints
 
 ### Authentication
 | Method | Endpoint | Description |
-|--------|----------|-------------|
+|---|---|---|
 | POST | `/api/auth/send-otp` | Send OTP for registration |
 | POST | `/api/auth/verify-otp` | Verify OTP and create account |
 | POST | `/api/auth/resend-otp` | Resend OTP |
@@ -73,28 +73,30 @@ Users ─────────< Items ─────────< Verificati
 
 ### Items
 | Method | Endpoint | Description |
-|--------|----------|-------------|
+|---|---|---|
 | POST | `/api/items` | Create a new item |
 | GET | `/api/items` | List items (with filters & pagination) |
+| GET | `/api/items/my-items` | Get current user's items |
 | GET | `/api/items/{id}` | Get item details |
-| PUT | `/api/items/{id}` | Update item |
-| DELETE | `/api/items/{id}` | Delete item |
+| PUT | `/api/items/{id}` | Update an item |
+| DELETE | `/api/items/{id}` | Delete an item |
 | POST | `/api/items/{id}/images` | Upload images |
 | GET | `/api/items/{id}/matches` | Get smart match suggestions |
 
 ### Claims & Verification
 | Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/items/{id}/questions` | Add verification questions (owner) |
-| GET | `/api/items/{id}/questions` | Get questions (public) |
+|---|---|---|
+| POST | `/api/items/{id}/questions` | Add verification questions |
+| GET | `/api/items/{id}/questions` | Get questions (hides answers) |
 | POST | `/api/items/{id}/claims` | Submit a claim |
-| GET | `/api/items/{id}/claims` | List claims (owner) |
+| GET | `/api/items/{id}/claims` | List claims (owner only) |
 | PUT | `/api/items/{id}/claims/{claim_id}` | Approve/reject claim |
+
+---
 
 ## Getting Started
 
 ### Prerequisites
-
 - Python 3.11+
 - Node.js 18+
 - PostgreSQL
@@ -114,7 +116,7 @@ pip install -r requirements.txt
 
 # Configure environment
 cp .env.example .env
-# Edit .env with your database URL, JWT secret, and email credentials
+# Edit .env with your database URL and SMTP credentials
 
 # Run migrations
 alembic upgrade head
@@ -135,39 +137,23 @@ npm install
 npm run dev
 ```
 
-The frontend runs on `http://localhost:5173` and the backend on `http://localhost:8000`.
+The frontend runs on `http://localhost:5173` and the backend API on `http://localhost:8000`.
 
-### Environment Variables
+---
+
+## Environment Variables
 
 Create a `.env` file in the `backend/` directory:
 
 ```env
 DATABASE_URL=postgresql://user:password@localhost:5432/lost_and_found
-JWT_SECRET_KEY=your-secret-key
-JWT_ALGORITHM=HS256
-JWT_EXPIRY_MINUTES=1440
-
+SECRET_KEY=your-secret-key
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USER=your-email@gmail.com
 SMTP_PASSWORD=your-app-password
-SMTP_FROM=your-email@gmail.com
 ```
-
-## How It Works
-
-### For someone who found an item:
-1. Post the item with photos, category, location, and date
-2. Add verification questions (e.g., "What color is the case?")
-3. Review incoming claims — compare answers against expected answers
-4. Approve the rightful owner
-
-### For someone who lost an item:
-1. Post what you lost with details
-2. Browse found items or check Smart Match suggestions
-3. Submit a claim on a matching found item
-4. Answer verification questions to prove ownership
 
 ## License
 
-This project is open source and available under the [MIT License](LICENSE).
+This project is open source 
