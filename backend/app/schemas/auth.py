@@ -49,6 +49,11 @@ class MessageResponse(BaseModel):
     message: str
 
 
+class UserUpdate(BaseModel):
+    """Request body for PUT /api/auth/me."""
+    full_name: str | None = Field(None, min_length=2, max_length=150)
+
+
 class VerifyOTP(BaseModel):
     """Request body for POST /api/auth/verify-email."""
     email: EmailStr
