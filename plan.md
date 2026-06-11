@@ -121,20 +121,6 @@ Then:
 
 ---
 
-### 7. Admin Panel
-
-Admin can manage the portal.
-
-Admin features:
-
-* View all lost/found posts
-* Delete fake posts
-* Approve/reject claims
-* Mark item as returned
-* Manage users
-
----
-
 ## Project Phases
 
 ## Phase 1 — Basic Setup
